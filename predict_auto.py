@@ -12,11 +12,10 @@ import argparse
 import chainer
 import chainer.links as L
 
-from func import ChangeHandler
 from watchdog.observers import Observer
 
 import Lib.imgfunc as IMG
-import func as F
+import Tools.func as F
 from predict import predict
 
 
@@ -45,7 +44,7 @@ def command():
     return parser.parse_args()
 
 
-class JPGMonitor(ChangeHandler):
+class JPGMonitor(F.ChangeHandler):
     def __init__(self, model, size, batch, gpu, copy):
         self.model = model
         self.size = size

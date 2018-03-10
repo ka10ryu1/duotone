@@ -25,8 +25,8 @@ def command():
                         help='使用するモデルパラメータ')
     parser.add_argument('jpeg', nargs='+',
                         help='使用する画像のパス')
-    parser.add_argument('--img_rate', '-r', type=float, default=1,
-                        help='画像サイズの倍率 [default: 1]')
+    parser.add_argument('--img_rate', '-r', type=float, default=0.5,
+                        help='画像サイズの倍率 [default: 0.5]')
     parser.add_argument('--batch', '-b', type=int, default=100,
                         help='ミニバッチサイズ [default: 100]')
     parser.add_argument('--gpu', '-g', type=int, default=-1,
