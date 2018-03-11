@@ -8,8 +8,12 @@
 <!--
 <img src="" width="640px">
 
-<img src="" width="640px">
+<img src="" width="640px">y
 -->
+
+上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/loss.png" width="640px">
 
 # 動作環境
 
