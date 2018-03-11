@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-help = 'jpegcompのネットワーク部分'
+help = 'duotoneのネットワーク部分（jpegcompから流用）'
 #
 
 from chainer import Chain
@@ -83,9 +83,9 @@ class JC_DDUU(Chain):
         """
 
         unit1 = n_unit
-        unit2 = n_unit*2
-        unit4 = n_unit*4
-        unit8 = n_unit*8
+        unit2 = n_unit * 2
+        unit4 = n_unit * 4
+        unit8 = n_unit * 8
 
         super(JC_DDUU, self).__init__()
         with self.init_scope():
@@ -99,10 +99,14 @@ class JC_DDUU(Chain):
 
             # U: n_unit_1, n_unit_2, ksize, stride, pad,
             #    actfun=None, dropout=0, rate=2
-            self.block2a = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun_2, dropout)
-            self.block2b = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun_2, dropout)
-            self.block2c = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun_2, dropout)
-            self.block2d = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun_2, dropout)
+            self.block2a = UpSampleBlock(
+                unit4, unit1, 5, 1, 2, actfun_2, dropout)
+            self.block2b = UpSampleBlock(
+                unit4, unit1, 5, 1, 2, actfun_2, dropout)
+            self.block2c = UpSampleBlock(
+                unit4, unit1, 5, 1, 2, actfun_2, dropout)
+            self.block2d = UpSampleBlock(
+                unit4, unit1, 5, 1, 2, actfun_2, dropout)
 
             self.blockN = UpSampleBlock(rate**2, 1, 5, 1, 2, actfun_2, 0, rate)
 

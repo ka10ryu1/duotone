@@ -27,12 +27,8 @@ def command():
                         help='使用するモデルパラメータ')
     parser.add_argument('monitor', help='監視するフォルダ')
     parser.add_argument('copy', help='コピーするフォルダ')
-    parser.add_argument('jpeg', nargs='+',
-                        help='使用する画像のパス')
-    parser.add_argument('--img_size', '-s', type=int, default=32,
-                        help='生成される画像サイズ [default: 32 pixel]')
-    parser.add_argument('--quality', '-q', type=int, default=5,
-                        help='画像の圧縮率 [default: 5]')
+    parser.add_argument('--img_rate', '-r', type=float, default=0.5,
+                        help='画像サイズの倍率 [default: 0.5]')
     parser.add_argument('--batch', '-b', type=int, default=100,
                         help='ミニバッチサイズ [default: 100]')
     parser.add_argument('--gpu', '-g', type=int, default=-1,
@@ -45,9 +41,10 @@ def command():
 
 
 class JPGMonitor(F.ChangeHandler):
-    def __init__(self, model, size, batch, gpu, copy):
+    def __init__(self, model, size, rate, batch, gpu, copy):
         self.model = model
         self.size = size
+        self.rate = rate
         self.batch = batch
         self.gpu = gpu
         self.copy = copy
@@ -59,15 +56,15 @@ class JPGMonitor(F.ChangeHandler):
             time.sleep(1)
             # 学習モデルを入力画像ごとに実行する
             with chainer.using_config('train', False):
-                img = cv2.imread(path, IMG.getCh(1))
+                img = IMG.resize(cv2.imread(path, IMG.getCh(3)), self.rate)
                 img = predict(self.model, IMG.split([img], self.size),
                               self.batch, img.shape, self.gpu)
                 cv2.imwrite(os.path.join(self.copy, name), img)
 
 
-def run(model, size, batch, gpu, monitor, copy):
+def run(model, size, rate, batch, gpu, monitor, copy):
     while 1:
-        event_handler = JPGMonitor(model, size, batch, gpu, copy)
+        event_handler = JPGMonitor(model, size, rate, batch, gpu, copy)
         observer = Observer()
         observer.schedule(event_handler, monitor, recursive=True)
         observer.start()
@@ -111,7 +108,8 @@ def main(args):
     print('Monitoring :', args.monitor)
     print('Copy to :', args.copy)
     print('Exit: Ctrl-c')
-    run(model, size, args.batch, args.gpu, args.monitor, args.copy)
+    run(model, size, args.img_rate, args.batch,
+        args.gpu, args.monitor, args.copy)
 
 
 if __name__ == '__main__':

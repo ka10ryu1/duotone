@@ -8,7 +8,7 @@ import cv2
 import argparse
 import numpy as np
 
-import func as F
+import Tools.func as F
 
 
 def command():
