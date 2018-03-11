@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*-coding: utf-8 -*-
 #
-help = 'モデルとモデルパラメータを利用して推論実行する'
+help = '複数の画像を任意の行列で結合する'
 #
 
 import cv2
