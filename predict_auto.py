@@ -14,7 +14,8 @@ import chainer.links as L
 
 from watchdog.observers import Observer
 
-import Lib.imgfunc as IMG
+import Tools.imgfunc as IMG
+import Tools.getfunc as GET
 import Tools.func as F
 from predict import predict
 
@@ -79,7 +80,7 @@ def run(model, size, rate, batch, gpu, monitor, copy):
 
 def main(args):
     # jsonファイルから学習モデルのパラメータを取得する
-    net, unit, ch, size, layer, sr, af1, af2 = IMG.getModelParam(args.param)
+    net, unit, ch, size, layer, sr, af1, af2 = GET.modelParam(args.param)
     # 学習モデルを生成する
     if net == 0:
         from Lib.network import JC_DDUU as JC
