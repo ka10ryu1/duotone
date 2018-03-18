@@ -77,7 +77,6 @@ $ tree >& log.txt
 │   ├── LICENSE
 │   ├── README.md
 │   ├── dot2png.py          < dot言語で記述されたファイルをPNG形式に変換する
-
 │   ├── func.py             < 便利機能
 │   ├── npz2jpg.py          < 作成したデータセット（.npz）の中身を画像として出力する
 │   ├── plot_diff.py        < logファイルの複数比較
