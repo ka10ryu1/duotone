@@ -5,15 +5,16 @@
 
 ## 学習結果
 
-<!--
-<img src="" width="640px">
+**荒いドット**
 
-<img src="" width="640px">y
--->
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="320px">
 
-上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。
+**細かいドット**
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-003.jpg" width="640px">y
 
-<img src="https://github.com/ka10ryu1/duotone/blob/image/loss.png" width="640px">
+上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。赤が荒いドットのloss、緑が細かいドットのloss。
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/plot_diff_loss.png" width="640px">
 
 # 動作環境
 
