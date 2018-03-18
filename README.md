@@ -5,11 +5,16 @@
 
 ## 学習結果
 
+**入力画像**
+
+<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test.JPG" width="640px">y
+
 **荒いドット**
 
 <img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="320px">
 
 **細かいドット**
+
 <img src="https://github.com/ka10ryu1/duotone/blob/image/comp-003.jpg" width="640px">y
 
 上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。赤が荒いドットのloss、緑が細かいドットのloss。
