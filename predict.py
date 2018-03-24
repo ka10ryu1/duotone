@@ -100,13 +100,13 @@ def main(args):
     # 学習モデルを入力画像ごとに実行する
     ch_flg = IMG.getCh(ch)
     org_imgs = [IMG.resize(cv2.imread(name, ch_flg), args.img_rate)
-                for name in args.jpeg if IMG.isImage(name)]
+                for name in args.jpeg if IMG.isImgPath(name)]
 
     imgs = []
     with chainer.using_config('train', False):
         for i, ei in enumerate(org_imgs):
             img = predict(
-                model, IMG.split([ei], size), args.batch, ei.shape, args.gpu
+                model, IMG.splitSQ(ei, size), args.batch, ei.shape, args.gpu
             )
             # 生成結果を保存する
             name = F.getFilePath(args.out_path, 'comp-' +
