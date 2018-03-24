@@ -245,6 +245,35 @@ def rotateRN(imgs, num, level=[-10, 10], scale=1.2):
     return np.array(out_imgs), np.array(out_angle)
 
 
+def flip(img, num=2):
+    """
+    画像を回転させてデータ数を水増しする
+    [in]  img:     入力画像
+    [in]  num:     水増しする数（最大4倍）
+    [out] out_img: 出力画像
+    """
+
+    if(num < 1):
+        return img
+
+    # ベース
+    out_img = [img.copy()]
+    # 上下反転を追加
+    f = cv2.flip(img, 0)
+    out_img.extend(f)
+    if(num > 1):
+        # 左右反転を追加
+        f = cv2.flip(img, 1)
+        out_img.extend(f)
+
+    if(num > 2):
+        # 上下左右反転を追加
+        f = cv2.flip(cv2.flip(img, 1), 0)
+        out_img.extend(f)
+
+    return out_img
+
+
 def flipN(imgs, num=2):
     """
     画像を回転させてデータ数を水増しする
