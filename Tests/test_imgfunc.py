@@ -25,155 +25,91 @@ class TestImgFunc(unittest.TestCase):
         self.assertEqual(IMG.getCh(2.5), cv2.IMREAD_UNCHANGED)
 
     def test_resize(self):
-        lenna = cv2.imread(lenna_path)
-        mandrill = cv2.imread(mandrill_path)
-        imgs = IMG.size2x([lenna, mandrill])
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        imgs = IMG.size2x([l, m])
         self.assertEqual(imgs[0].shape, (512, 512, 3))
         self.assertEqual(imgs[1].shape, (512, 512, 3))
-        self.assertEqual(IMG.resize(lenna, 2).shape, (512, 512, 3))
-        self.assertEqual(IMG.resize(lenna, 1.5).shape, (384, 384, 3))
-        self.assertEqual(IMG.resize(lenna, 0.5).shape, (128, 128, 3))
+        self.assertEqual(IMG.resize(l, 2).shape, (512, 512, 3))
+        self.assertEqual(IMG.resize(l, 1.5).shape, (384, 384, 3))
+        self.assertEqual(IMG.resize(l, 0.5).shape, (128, 128, 3))
 
-    def test_isImage(self):
-        self.assertTrue(IMG.isImage(lenna_path))
-        self.assertFalse(IMG.isImage('./Tools/Tests/Lenno.bmp'))
+    def test_isImgPath(self):
+        self.assertTrue(IMG.isImgPath(lenna_path))
+        self.assertFalse(IMG.isImgPath('./Tools/Tests/Lenno.bmp'))
+        self.assertFalse(IMG.isImgPath(None))
+        self.assertFalse(IMG.isImgPath(0))
 
     def test_encodeDecode(self):
-        lenna = cv2.imread(lenna_path)
-        mandrill = cv2.imread(mandrill_path)
-        self.assertEqual(len(IMG.encodeDecode([lenna, mandrill], 3)), 2)
-        lenna = cv2.imread(lenna_path, IMG.getCh(1))
-        mandrill = cv2.imread(mandrill_path, IMG.getCh(1))
-        self.assertEqual(len(IMG.encodeDecode([lenna, mandrill], 1)), 2)
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        self.assertEqual(IMG.encodeDecodeN([l, m], 3).shape, (2, 256, 256, 3))
+        self.assertEqual(IMG.encodeDecodeN([l, m], 1).shape, (2, 256, 256))
+        l = cv2.imread(lenna_path, IMG.getCh(1))
+        m = cv2.imread(mandrill_path, IMG.getCh(1))
+        self.assertEqual(IMG.encodeDecodeN([l, m], 3).shape, (2, 256, 256, 3))
+        self.assertEqual(IMG.encodeDecodeN([l, m], 1).shape, (2, 256, 256))
+
+    def test_cut(self):
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        self.assertEqual(IMG.cutN([l, m], 64).shape, (2, 64, 64, 3))
+        self.assertEqual(IMG.cutN([l, m], 1).shape, (2, 256, 256, 3))
+        self.assertEqual(IMG.cutN([l, m], 0).shape, (2, 256, 256, 3))
+        self.assertEqual(IMG.cutN([l, m], -1).shape, (2, 256, 256, 3))
 
     def test_split(self):
-        lenna = cv2.imread(lenna_path)
-        mandrill = cv2.imread(mandrill_path)
-        split = IMG.split([lenna, mandrill], 32)
-        self.assertEqual(split[0].shape, (162, 32, 32, 3))
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        imgs, split = IMG.splitSQN([l, m], 32)
+        self.assertEqual(imgs.shape, (162, 32, 32, 3))
+        self.assertEqual(split, (9, 9))
 
-        split = IMG.split([lenna, mandrill], 32, 10)
-        self.assertEqual(split[0].shape, (160, 32, 32, 3))
-        split = IMG.split([lenna, mandrill], 32, 100)
-        self.assertEqual(split[0].shape, (100, 32, 32, 3))
         with self.assertRaises(SystemExit):
-            IMG.split([lenna, mandrill], 32, 1000)
+            imgs, split = IMG.splitSQN([l, m], 0)
 
-        lenna = cv2.imread(lenna_path, IMG.getCh(1))
-        mandrill = cv2.imread(mandrill_path, IMG.getCh(1))
-        split = IMG.split([lenna, mandrill], 32)
-        self.assertEqual(split[0].shape, (162, 32, 32))
+        imgs, split = IMG.splitSQN([l, m], 32, 10)
+        self.assertEqual(imgs.shape, (160, 32, 32, 3))
+        self.assertEqual(split, (9, 9))
 
-    def test_rotate(self):
-        lenna = cv2.imread(lenna_path)
-        mandrill = cv2.imread(mandrill_path)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill])), 6)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill], num=-1)), 4)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill], num=0)), 4)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill], num=1)), 4)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill], num=2)), 6)
-        self.assertEqual(len(IMG.rotate([lenna, mandrill], num=3)), 8)
+        imgs, split = IMG.splitSQN([l, m], 32, 100)
+        self.assertEqual(imgs.shape, (100, 32, 32, 3))
+        self.assertEqual(split, (9, 9))
+
+        with self.assertRaises(SystemExit):
+            IMG.splitSQN([l, m], 32, 1000)
+
+        l = cv2.imread(lenna_path, IMG.getCh(1))
+        m = cv2.imread(mandrill_path, IMG.getCh(1))
+        imgs, split = IMG.splitSQN([l, m], 32)
+        self.assertEqual(imgs.shape, (162, 32, 32))
+        self.assertEqual(split, (9, 9))
+
+    def test_rotateRN(self):
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        imgs, angle = IMG.rotateRN([l, m], 3)
+        self.assertEqual(imgs.shape, (6, 256, 256, 3))
+        self.assertEqual(angle.shape, (6,))
+
+    def test_flip(self):
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        self.assertEqual(IMG.flipN([l, m]).shape, (6, 256, 256, 3))
+        self.assertEqual(IMG.flipN([l, m], -1).shape, (2, 256, 256, 3))
+        self.assertEqual(IMG.flipN([l, m], 0).shape,  (2, 256, 256, 3))
+        self.assertEqual(IMG.flipN([l, m], 1).shape,  (4, 256, 256, 3))
+        self.assertEqual(IMG.flipN([l, m], 2).shape,  (6, 256, 256, 3))
+        self.assertEqual(IMG.flipN([l, m], 3).shape,  (8, 256, 256, 3))
 
     def test_imgs2arr(self):
-        lenna = cv2.imread(lenna_path)
-        mandrill = cv2.imread(mandrill_path)
-        self.assertEqual(IMG.imgs2arr(
-            [lenna, mandrill]).shape, (2, 3, 256, 256))
+        l = cv2.imread(lenna_path)
+        m = cv2.imread(mandrill_path)
+        self.assertEqual(IMG.imgs2arr([l, m]).shape, (2, 3, 256, 256))
 
-        lenna = cv2.imread(lenna_path, IMG.getCh(1))
-        mandrill = cv2.imread(mandrill_path, IMG.getCh(1))
-        self.assertEqual(IMG.imgs2arr(
-            [lenna, mandrill]).shape, (2, 1, 256, 256))
-
-    def test_getLossfun(self):
-        self.assertEqual(
-            IMG.getLossfun('mse').__name__, 'mean_squared_error'
-        )
-        self.assertEqual(
-            IMG.getLossfun('mae').__name__, 'mean_absolute_error'
-        )
-        self.assertEqual(
-            IMG.getLossfun('ber').__name__, 'bernoulli_nll'
-        )
-        self.assertEqual(
-            IMG.getLossfun('gauss_kl').__name__, 'gaussian_kl_divergence'
-        )
-        self.assertEqual(
-            IMG.getLossfun('test').__name__, 'mean_squared_error'
-        )
-        self.assertEqual(
-            IMG.getLossfun('').__name__, 'mean_squared_error'
-        )
-
-    def test_getActfun(self):
-        self.assertEqual(
-            IMG.getActfun('relu').__name__, 'relu'
-        )
-        self.assertEqual(
-            IMG.getActfun('elu').__name__, 'elu'
-        )
-        self.assertEqual(
-            IMG.getActfun('c_relu').__name__, 'clipped_relu'
-        )
-        self.assertEqual(
-            IMG.getActfun('l_relu').__name__, 'leaky_relu'
-        )
-        self.assertEqual(
-            IMG.getActfun('sigmoid').__name__, 'sigmoid'
-        )
-        self.assertEqual(
-            IMG.getActfun('h_sigmoid').__name__, 'hard_sigmoid'
-        )
-        self.assertEqual(
-            IMG.getActfun('tanh').__name__, 'tanh'
-        )
-        self.assertEqual(
-            IMG.getActfun('s_plus').__name__, 'softplus'
-        )
-        self.assertEqual(
-            IMG.getActfun('none').__name__, 'F_None'
-        )
-        self.assertEqual(
-            IMG.getActfun('test').__name__, 'relu'
-        )
-        self.assertEqual(
-            IMG.getActfun('').__name__, 'relu'
-        )
-
-    def test_getOptimizer(self):
-        self.assertEqual(
-            IMG.getOptimizer('adam').__class__.__name__, 'Adam'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('ada_d').__class__.__name__, 'AdaDelta'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('ada_g').__class__.__name__, 'AdaGrad'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('m_sgd').__class__.__name__, 'MomentumSGD'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('n_ag').__class__.__name__, 'NesterovAG'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('rmsp').__class__.__name__, 'RMSprop'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('rmsp_g').__class__.__name__, 'RMSpropGraves'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('sgd').__class__.__name__, 'SGD'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('smorms').__class__.__name__, 'SMORMS3'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('test').__class__.__name__, 'Adam'
-        )
-        self.assertEqual(
-            IMG.getOptimizer('').__class__.__name__, 'Adam'
-        )
+        l = cv2.imread(lenna_path, IMG.getCh(1))
+        m = cv2.imread(mandrill_path, IMG.getCh(1))
+        self.assertEqual(IMG.imgs2arr([l, m]).shape, (2, 1, 256, 256))
 
 
 if __name__ == '__main__':
