@@ -53,12 +53,12 @@ class JPGMonitor(F.ChangeHandler):
     def on_modified(self, event):
         path, name, ext = super().on_modified(event)
         if('jpg' in ext.lower()):
-            print(path, name, ext)
+            print('duotone:{0}'.format(os.path.join(self.copy, path)))
             time.sleep(1)
             # 学習モデルを入力画像ごとに実行する
             with chainer.using_config('train', False):
                 img = IMG.resize(cv2.imread(path, IMG.getCh(3)), self.rate)
-                img = predict(self.model, IMG.split([img], self.size),
+                img = predict(self.model, IMG.splitSQ(img, self.size),
                               self.batch, img.shape, self.gpu)
                 cv2.imwrite(os.path.join(self.copy, name), img)
 

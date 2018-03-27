@@ -87,7 +87,7 @@ class JC_DDUU(Chain):
         unit2 = n_unit * 2
         unit4 = n_unit * 4
         unit8 = n_unit * 8
-        nout = (rate**2) * 3
+        nout = (rate**2) * n_out
 
         super(JC_DDUU, self).__init__()
         with self.init_scope():
@@ -105,11 +105,11 @@ class JC_DDUU(Chain):
             self.u2 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
             self.u3 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
             self.u4 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
-            self.u5 = UpSampleBlock(nout, 3, 5, 1, 2, actfun2, 0, 0.02, rate)
+            self.u5 = UpSampleBlock(nout, n_out, 5, 1, 2, actfun2, 0, 0.02, rate)
 
         self.view = view
         self.cnt = 0
-        self.timer = 0
+        self.timer = time.time()
 
         print('[Network info]', self.__class__.__name__)
         print('  Unit:\t{0}\n  Out:\t{1}\n  Drop out:\t{2}\nAct Func:\t{3}, {4}'.format(
@@ -118,16 +118,14 @@ class JC_DDUU(Chain):
 
     def block(self, f, x):
         if self.view:
-            print('{0:2}: {1}\t{2:6.3f} s\t{3} '.format(
+            print('{0:2}: {1}\t{2:5.3f} s\t{3} '.format(
                 self.cnt, f.__class__.__name__, time.time()-self.timer, x.shape))
             self.cnt += 1
+            self.timer = time.time()
 
         return f(x)
 
     def __call__(self, x):
-        if self.view:
-            self.timer = time.time()
-
         hc = []
 
         ha = self.block(self.d1, x)
@@ -143,7 +141,7 @@ class JC_DDUU(Chain):
         y = self.block(self.u5, h)
 
         if self.view:
-            print('Output:{0:6.3f} s\t {1}'.format(time.time()-self.timer, y.shape))
+            print('Output:', y.shape)
             exit()
         else:
             return y

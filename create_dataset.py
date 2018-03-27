@@ -48,7 +48,7 @@ def saveNPZ(x, y, name, folder, size):
 def main(args):
 
     # 入力のカラー画像を読み込む
-    if IMG.isImage(args.color):
+    if IMG.isImgPath(args.color):
         print('color image read:\t', args.color)
         x = cv2.imread(args.color, IMG.getCh(3))
     else:
@@ -56,7 +56,7 @@ def main(args):
         exit()
 
     # 正解のモノクロ画像を読み込む
-    if IMG.isImage(args.duotone):
+    if IMG.isImgPath(args.duotone):
         print('duotone image read:\t', args.duotone)
         y = cv2.imread(args.duotone, IMG.getCh(1))
     else:
@@ -64,10 +64,10 @@ def main(args):
         exit()
 
     print('split and rotate images...')
-    x, _ = IMG.split(IMG.rotate([x], args.augmentation),
-                     args.img_size, args.round)
-    y, _ = IMG.split(IMG.rotate([y], args.augmentation),
-                     args.img_size, args.round)
+    x, _ = IMG.splitSQN(IMG.flip(x, args.augmentation),
+                        args.img_size, args.round)
+    y, _ = IMG.splitSQN(IMG.flip(y, args.augmentation),
+                        args.img_size, args.round)
 
     # 画像の並び順をシャッフルするための配列を作成する
     # colorとmonoの対応を崩さないようにシャッフルしなければならない

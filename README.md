@@ -5,15 +5,35 @@
 
 ## 学習結果
 
-<!--
-<img src="" width="640px">
+### 入力画像
 
-<img src="" width="640px">y
--->
+<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test.JPG" width="640px">
 
-上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。
+### 荒いドット
 
-<img src="https://github.com/ka10ryu1/duotone/blob/image/loss.png" width="640px">
+**入力画像（上）と正解画像**
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/npz2jpg_1.jpg" width="640px">
+
+**学習結果**
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="320px">
+
+### 細かいドット
+
+**入力画像（上）と正解画像**
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/npz2jpg_3.jpg" width="640px">
+
+**学習結果**
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-003.jpg" width="640px">
+
+### 過学習
+
+上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。赤が荒いドットのloss、緑が細かいドットのloss。
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/plot_diff_loss.png" width="640px">
 
 # 動作環境
 
@@ -57,7 +77,6 @@ $ tree >& log.txt
 │   ├── LICENSE
 │   ├── README.md
 │   ├── dot2png.py          < dot言語で記述されたファイルをPNG形式に変換する
-
 │   ├── func.py             < 便利機能
 │   ├── npz2jpg.py          < 作成したデータセット（.npz）の中身を画像として出力する
 │   ├── plot_diff.py        < logファイルの複数比較
