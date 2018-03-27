@@ -149,6 +149,7 @@ def splitSQ(img, size, flg=cv2.BORDER_REPLICATE):
     img = img[:(img.shape[0] // size * size), :(img.shape[1] // size * size)]
     # 縦横の分割数を計算する
     split = (img.shape[0] // size, img.shape[1] // size)
+
     # 画像を分割する
     imgs_2d = [np.vsplit(img, split[0]) for img in np.hsplit(img, split[1])]
     imgs_1d = [x for l in imgs_2d for x in l]
@@ -339,7 +340,11 @@ def resizeP(img, pixel, flg=cv2.INTER_NEAREST):
     [out] サイズを変更した画像リスト
     """
 
-    return resize(img, pixel / np.min(img.shape[:2]), flg)
+    r_img = resize(img, pixel / np.min(img.shape[:2]), flg)
+    b_img = cv2.copyMakeBorder(
+        r_img, 0, 2, 0, 2, cv2.BORDER_CONSTANT, value=(0, 0, 0)
+    )
+    return b_img[:pixel, :pixel]
 
 
 def resizeN(imgs, rate, flg=cv2.INTER_NEAREST):
@@ -363,6 +368,60 @@ def size2x(imgs, flg=cv2.INTER_NEAREST):
     """
 
     return [resize(i, 2, flg) for i in imgs]
+
+
+def paste(fg, bg, mask_flg=True, random_flg=True):
+    """
+    背景に前景を重ね合せる
+    [in]  fg:         重ね合せる背景
+    [in]  bg:         重ね合せる前景
+    [in]  mask_flg:   マスク処理を大きめにするフラグ
+    [in]  random_flg: 前景をランダムに配置するフラグ
+    [out] 重ね合せた画像
+    """
+
+    # Load two images
+    img1 = bg.copy()
+    if random_flg:
+        img2, _ = rotateR(fg, [-90, 90], 1.0)
+    else:
+        img2 = fg.copy()
+
+    # I want to put logo on top-left corner, So I create a ROI
+    w1, h1 = img1.shape[:2]
+    w2, h2 = img2.shape[:2]
+    if random_flg:
+        x = np.random.randint(0, w1 - w2 + 1)
+        y = np.random.randint(0, w1 - w2 + 1)
+    else:
+        x = 0
+        y = 0
+
+    roi = img1[x:x + w2, y:y + h2]
+
+    # Now create a mask of logo and create its inverse mask also
+    mask = img2[:, :, 3]
+    ret, mask_inv = cv2.threshold(
+        cv2.bitwise_not(mask),
+        200, 255, cv2.THRESH_BINARY
+    )
+
+    if mask_flg:
+        kernel1 = np.ones((5, 5), np.uint8)
+        kernel2 = np.ones((3, 3), np.uint8)
+        mask_inv = cv2.dilate(mask_inv, kernel1, iterations=1)
+        mask_inv = cv2.erode(mask_inv, kernel2, iterations=1)
+
+    # Now black-out the area of logo in ROI
+    img1_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+
+    # Take only region of logo from logo image.
+    img2_fg = cv2.bitwise_and(img2, img2, mask=mask)
+
+    # Put logo in ROI and modify the main image
+    dst = cv2.add(img1_bg, img2_fg)
+    img1[x:x + w2, y:y + h2] = dst
+    return img1
 
 
 def arr2x(arr, flg=cv2.INTER_NEAREST):
