@@ -55,38 +55,38 @@ $ tree >& log.txt
 
 ## ファイル
 
-
-
-
-
-
 ```console
 .
 ├── LICENSE
 ├── Lib
-│   ├── Tests
-│   │   ├── Lenna.bmp
-│   │   ├── Mandrill.bmp
-│   │   └── test_imgfunc.py < imgfuncのテスト用コード
-│   ├── imgfunc.py          < 画像処理に関する便利機能
-│   ├── network.py          < duotoneのネットワーク部分（jpegcompから流用）
-│   ├── network2.py         < duotoneのネットワーク部分その2（jpegcompから流用）
+│   ├── network.py  > jpegcompのネットワーク部分
+│   ├── network2.py > duotoneのネットワーク部分
 │   └── plot_report_log.py
 ├── README.md
 ├── Tools
 │   ├── LICENSE
 │   ├── README.md
-│   ├── dot2png.py          < dot言語で記述されたファイルをPNG形式に変換する
-│   ├── func.py             < 便利機能
-│   ├── npz2jpg.py          < 作成したデータセット（.npz）の中身を画像として出力する
-│   ├── plot_diff.py        < logファイルの複数比較
-│   └── png_monitoring.py   < 任意のフォルダの監視
+│   ├── Tests
+│   │   ├── Lenna.bmp       > テスト用画像
+│   │   ├── Mandrill.bmp    > テスト用画像
+│   │   ├── test_getfunc.py > getfuncのテスト用コード
+│   │   └── test_imgfunc.py > imgfuncのテスト用コード'
+│   ├── dot2png.py         > dot言語で記述されたファイルをPNG形式に変換する
+│   ├── func.py            > 便利機能
+│   ├── getfunc.py         > 画像処理に関する便利機能
+│   ├── imgfunc.py         > 画像処理に関する便利機能
+│   ├── npz2jpg.py         > 作成したデータセット（.npz）の中身を画像として出力する
+│   ├── plot_diff.py       > logファイルの複数比較
+│   └── png_monitoring.py  > 任意のフォルダの監視
+├── auto_train.sh
 ├── clean_all.sh
-├── concat.py               < 複数の画像を任意の行列で結合する
-├── create_dataset.py       < 画像を読み込んでデータセットを作成する
-├── predict.py              < モデルとモデルパラメータを利用して推論実行する
-├── predict_auto.py         < 任意のフォルダに保存された画像を推論実行し、別のフォルダに自動で保存する
-└── train.py                < 学習メイン部
+├── concat.py         > 複数の画像を任意の行列で結合する
+├── create_dataset.py > 画像を読み込んでデータセットを作成する
+├── predict.py        > モデルとモデルパラメータを利用して推論実行する
+├── predict_auto.py   > 任意のフォルダに保存された画像を推論実行し、別のフォルダに自動で保存する
+└── train.py          > 学習メイン部
+
+3 directories, 25 files
 ```
 
 データセットはテストデータ含め[別リポジトリ](https://github.com/ka10ryu1/FontDataAll)にて管理している。
@@ -107,10 +107,10 @@ $ tree >& log.txt
 ## データセットを作成する
 
 ```console
-$ ./create_dataset.py ../ImageDataAll/concat_color.jpg ./ImageDataAll/concat_duotone_3.png
+$ ./create_dataset.py ../ImageDataAll/concat_color.jpg ./ImageDataAll/concat_duotone_2.png
 ```
 
-`result`フォルダが作成され、その直下に以下の学習用データとテスト用データが保存作成される。
+`result`フォルダが作成され、その直下に以下の学習用データとテスト用データが保存作成される。データ量が大きい場合は、オプション引数`-a 0`を利用してデータ数を減らすといい。
 
 - `test_32x32_*.npz`
 - `train_32x32_*.npz`
