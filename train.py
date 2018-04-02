@@ -4,23 +4,39 @@
 help = '学習メイン部'
 #
 
-import os
 import json
 import argparse
 import numpy as np
-from datetime import datetime
 
 import chainer
 import chainer.links as L
 from chainer import training
 from chainer.training import extensions
-from chainer.datasets import tuple_dataset
 
 
 from Lib.plot_report_log import PlotReportLog
 import Tools.imgfunc as IMG
 import Tools.getfunc as GET
 import Tools.func as F
+
+
+class ResizeImgDataset(chainer.dataset.DatasetMixin):
+    def __init__(self, dataset, rate, dtype=np.float32):
+        self._dataset = dataset
+        self._rate = rate
+        self._dtype = dtype
+        self._len = len(self._dataset)
+
+    def __len__(self):
+        # データセットの数を返します
+        return self._len
+
+    def get_example(self, i):
+        # データセットのインデックスを受け取って、データを返します
+        inputs = self._dataset[i]
+        x, y = inputs
+        y = IMG.arrNx(y, self._rate)
+        return x.astype(self._dtype), y.astype(self._dtype)
 
 
 def command():
@@ -64,67 +80,10 @@ def command():
     return parser.parse_args()
 
 
-def getImageData(folder):
-    """
-    フォルダにあるファイルから学習用データとテスト用データを取得する
-    [in]  folder: 探索するフォルダ
-    [out] train:  取得した学習用データ
-    [out] test:   取得したテスト用データ
-    """
-
-    # 探索するフォルダがなければ終了
-    if not os.path.isdir(folder):
-        print('[Error] folder not found:', folder)
-        print(F.fileFuncLine())
-        exit()
-
-    # 学習用データとテスト用データを発見したらTrueにする
-    train_flg = False
-    test_flg = False
-    # フォルダ内のファイルを探索していき、
-    # 1. ファイル名の頭がtrain_なら学習用データとして読み込む
-    # 2. ファイル名の頭がtest_ならテスト用データとして読み込む
-    for l in os.listdir(folder):
-        name, ext = os.path.splitext(os.path.basename(l))
-        if os.path.isdir(l):
-            pass
-        elif('train_' in name)and('.npz' in ext)and(train_flg is False):
-            np_arr = np.load(os.path.join(folder, l))
-            print('{0}:\tx{1},\ty{2}'.format(
-                l, np_arr['x'].shape, np_arr['y'].shape)
-            )
-            x = np.array(np_arr['x'], dtype=np.float32)
-            y = IMG.arr2x(np.array(np_arr['y'], dtype=np.float32))
-            train = tuple_dataset.TupleDataset(x, y)
-            if(train._length > 0):
-                train_flg = True
-
-        elif('test_' in name)and('.npz' in ext)and(test_flg is False):
-            np_arr = np.load(os.path.join(folder, l))
-            print('{0}:\tx{1},\ty{2}'.format(
-                l, np_arr['x'].shape, np_arr['y'].shape)
-            )
-            x = np.array(np_arr['x'], dtype=np.float32)
-            y = IMG.arr2x(np.array(np_arr['y'], dtype=np.float32))
-            test = tuple_dataset.TupleDataset(x, y)
-            if(test._length > 0):
-                test_flg = True
-
-    # 学習用データとテスト用データの両方が見つかった場合にのみ次のステップへ進める
-    if(train_flg is True)and(test_flg is True):
-        return train, test
-    else:
-        print('[Error] dataset not found in this folder:', folder)
-        exit()
-
-
 def main(args):
 
     # 各種データをユニークな名前で保存するために時刻情報を取得する
-    now = datetime.today()
-    exec_time1 = int(now.strftime('%y%m%d'))
-    exec_time2 = int(now.strftime('%H%M%S'))
-    exec_time = np.base_repr(exec_time1 * exec_time2, 32).lower()
+    exec_time = GET.datetime32()
 
     # Set up a neural network to train
     # Classifier reports softmax cross entropy loss and accuracy at every
@@ -159,7 +118,9 @@ def main(args):
     optimizer.setup(model)
 
     # Load dataset
-    train, test = getImageData(args.in_path)
+    train, test = GET.imgData(args.in_path)
+    train = ResizeImgDataset(train, args.shuffle_rate)
+    test = ResizeImgDataset(test, args.shuffle_rate)
     # predict.pyでモデルを決定する際に必要なので記憶しておく
     model_param = {i: getattr(args, i) for i in dir(args) if not '_' in i[0]}
     model_param['shape'] = train[0][0].shape
@@ -194,7 +155,7 @@ def main(args):
 
     # Write a log of evaluation statistics for each epoch
     trainer.extend(extensions.LogReport(log_name=exec_time + '.log'))
-    trainer.extend(extensions.observe_lr())
+    # trainer.extend(extensions.observe_lr())
 
     # Save two plot images to the result dir
     if args.plot and extensions.PlotReport.available():
@@ -203,10 +164,10 @@ def main(args):
                           'epoch', file_name='loss.png')
         )
 
-        trainer.extend(
-            PlotReportLog(['lr'],
-                          'epoch', file_name='lr.png', val_pos=(-80, -60))
-        )
+        # trainer.extend(
+        #     PlotReportLog(['lr'],
+        #                   'epoch', file_name='lr.png', val_pos=(-80, -60))
+        # )
 
     # Print selected entries of the log to stdout
     # Here "main" refers to the target link of the "main" optimizer again, and
@@ -217,7 +178,7 @@ def main(args):
         'epoch',
         'main/loss',
         'validation/main/loss',
-        'lr',
+        # 'lr',
         'elapsed_time'
     ]))
 
