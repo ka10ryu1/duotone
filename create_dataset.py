@@ -45,6 +45,21 @@ def saveNPZ(x, y, name, folder, size):
     np.savez(F.getFilePath(folder, name + size_str + num_str), x=x, y=y)
 
 
+def edgeDetect(duotone, color):
+
+    gray = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
+    gray = cv2.medianBlur(gray, 5)
+    edge = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                 cv2.THRESH_BINARY, 11, 2)
+    kernel = np.ones((3, 3), np.uint8)
+    edge = cv2.morphologyEx(edge, cv2.MORPH_OPEN, kernel)
+    edge = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel)
+    edge = cv2.dilate(edge, kernel, iterations=1)
+    edge = cv2.erode(edge, kernel, iterations=1)
+
+    return cv2.bitwise_and(duotone, edge)
+
+
 def main(args):
 
     # 入力のカラー画像を読み込む
@@ -58,7 +73,7 @@ def main(args):
     # 正解のモノクロ画像を読み込む
     if IMG.isImgPath(args.duotone):
         print('duotone image read:\t', args.duotone)
-        y = cv2.imread(args.duotone, IMG.getCh(1))
+        y = edgeDetect(cv2.imread(args.duotone, IMG.getCh(1)), x)
     else:
         print('[ERROR] duotone image not found:', args.duotone)
         exit()
