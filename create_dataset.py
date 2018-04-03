@@ -46,17 +46,15 @@ def saveNPZ(x, y, name, folder, size):
 
 
 def edgeDetect(duotone, color):
-
-    gray = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
-    gray = cv2.medianBlur(gray, 5)
-    edge = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                 cv2.THRESH_BINARY, 11, 2)
-    kernel = np.ones((3, 3), np.uint8)
-    edge = cv2.morphologyEx(edge, cv2.MORPH_OPEN, kernel)
-    edge = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel)
-    edge = cv2.dilate(edge, kernel, iterations=1)
-    edge = cv2.erode(edge, kernel, iterations=1)
-
+    kernel5 = np.ones((5, 5), np.uint8)
+    kernel3 = np.ones((3, 3), np.uint8)
+    dilation = cv2.dilate(color, kernel5, iterations=1)
+    diff = cv2.subtract(dilation, color)
+    diff_inv = 255 - diff
+    gray = cv2.cvtColor(diff_inv, cv2.COLOR_BGR2GRAY)
+    _, edge = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+    edge = cv2.erode(edge, kernel5, iterations=1)
+    edge = cv2.dilate(edge, kernel3, iterations=1)
     return cv2.bitwise_and(duotone, edge)
 
 
