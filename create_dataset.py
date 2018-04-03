@@ -22,8 +22,6 @@ def command():
                         help='切り捨てる数（default: 100）')
     parser.add_argument('--augmentation', '-a', type=int, default=2,
                         help='水増しの種類（default: 2）')
-    # parser.add_argument('--channel', '-c', type=int, default=1,
-    #                     help='入力画像のチャンネル数（default: 1）')
     parser.add_argument('--train_per_all', '-t', type=float, default=0.9,
                         help='画像数に対する学習用画像の割合（default: 0.9）')
     parser.add_argument('-o', '--out_path', default='./result/',
@@ -46,15 +44,28 @@ def saveNPZ(x, y, name, folder, size):
 
 
 def edgeDetect(duotone, color):
+    """
+    カラー画像のエッジを抽出し、モノクロ2値画像に重ねる
+    [in] duotone: モノクロ2値画像
+    [in] color:   エッジ抽出したいカラー画像
+    [out] エッジとモノクロ2値を重ねた画像
+    """
+
+    # カーネルサイズの設定
     kernel5 = np.ones((5, 5), np.uint8)
     kernel3 = np.ones((3, 3), np.uint8)
+    # dilate -> diff で線が抽出できる
     dilation = cv2.dilate(color, kernel5, iterations=1)
     diff = cv2.subtract(dilation, color)
     diff_inv = 255 - diff
+    # 線を単色 -> 2値にする
     gray = cv2.cvtColor(diff_inv, cv2.COLOR_BGR2GRAY)
     _, edge = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+    # 線のジャギを消すためにerode->dilateするが、
+    # 線を少し太く残したいので、dilateのカーネルサイズは少し小さく
     edge = cv2.erode(edge, kernel5, iterations=1)
     edge = cv2.dilate(edge, kernel3, iterations=1)
+    # 線画とモノクロ2値を重ねる
     return cv2.bitwise_and(duotone, edge)
 
 
@@ -76,6 +87,9 @@ def main(args):
         print('[ERROR] duotone image not found:', args.duotone)
         exit()
 
+    # 入力画像と正解画像を
+    # [1] 反転して増やす [flip()]
+    # [2] 正方形に分割する [splitSQN()]
     print('split and rotate images...')
     x, _ = IMG.splitSQN(IMG.flip(x, args.augmentation),
                         args.img_size, args.round)
@@ -88,7 +102,9 @@ def main(args):
     print('shuffle images...')
     shuffle = np.random.permutation(range(len(x)))
     train_size = int(len(x) * args.train_per_all)
-    print(train_size, len(x))  # , x.shape)
+    print('train/all : {0}/{1}'.format(train_size, len(x)))
+    # float16で保存することでファイルサイズを軽減できる
+    # 情報量は落ちるが問題ないレベル
     dtype = np.float16
     train_x = IMG.imgs2arr(x[shuffle[:train_size]], dtype=dtype)
     train_y = IMG.imgs2arr(y[shuffle[:train_size]], dtype=dtype)
