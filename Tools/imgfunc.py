@@ -154,7 +154,7 @@ def splitSQ(img, size, flg=cv2.BORDER_REPLICATE):
     imgs_2d = [np.vsplit(i, split[0])
                for i in np.hsplit(img, split[1])]
     imgs_1d = [x for l in imgs_2d for x in l]
-    return imgs_1d, split
+    return np.array(imgs_1d), split
 
 
 def splitSQN(imgs, size, round_num=-1, flg=cv2.BORDER_REPLICATE):
