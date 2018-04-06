@@ -37,7 +37,7 @@ def command():
     return parser.parse_args()
 
 
-def predict(model, data, batch, org_shape, gpu):
+def predict(model, data, size, rate, gpu):
     """
     推論実行メイン部
     [in]  model:     推論実行に使用するモデル
@@ -48,15 +48,17 @@ def predict(model, data, batch, org_shape, gpu):
     [out] img:       推論実行で得られた生成画像
     """
 
+    shape = data.shape
+    data_sq, _ = IMG.splitSQ(data, size)
     # dataには圧縮画像と分割情報が含まれているので、分離する
-    comp, size = data
     imgs = []
     st = time.time()
-    # バッチサイズごとに学習済みモデルに入力して画像を生成する
-    for i in range(0, len(comp), batch):
-        x = IMG.imgs2arr(comp[i:i + batch], gpu=gpu)
-        y = model.predictor(x)
-        imgs.extend(IMG.arr2imgs(to_cpu(y.array)))
+    # 学習済みモデルに入力して画像を生成する
+    print(data.shape)
+    x = IMG.imgs2arr(data, gpu=gpu)
+    print(x.shape)
+    y = model.predictor(x)
+    imgs.extend(IMG.arr2imgs(to_cpu(y.array)))
 
     print('exec time: {0:.2f}[s]'.format(time.time() - st))
     # 生成された画像を分割情報をもとに結合する
@@ -64,9 +66,9 @@ def predict(model, data, batch, org_shape, gpu):
            for i in range(size[1])]
     img = np.hstack(buf)
     # 出力画像は入力画像の2倍の大きさになっているので半分に縮小する
-    img = IMG.resize(img, 0.5)
+    img = IMG.resize(img, 1 / rate)
     # 結合しただけでは画像サイズがオリジナルと異なるので切り取る
-    return img[:org_shape[0], :org_shape[1]]
+    return img[:shape[0], :shape[1]]
 
 
 def main(args):
@@ -105,9 +107,8 @@ def main(args):
     imgs = []
     with chainer.using_config('train', False):
         for i, ei in enumerate(org_imgs):
-            img = predict(
-                model, IMG.splitSQ(ei, size), args.batch, ei.shape, args.gpu
-            )
+            img = predict(model, ei, size, sr, args.gpu)
+
             # 生成結果を保存する
             name = F.getFilePath(args.out_path, 'comp-' +
                                  str(i * 10 + 1).zfill(3), '.jpg')
