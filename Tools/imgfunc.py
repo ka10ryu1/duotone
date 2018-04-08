@@ -183,16 +183,21 @@ def splitSQ(img, size, flg=cv2.BORDER_REPLICATE, array=True):
         else:
             return x
 
+    def square(img):
+        width = np.min(img.shape[:2])
+        return img[:width, :width]
+
     h, w = img.shape[:2]
     split = (h // size, w // size)
 
     # sizeが負数だと分割しないでそのまま返す
     if size <= 1:
-        return arrayChk([img], array), (1, 1)
+
+        return arrayChk([square(img)], array), (1, 1)
 
     # sizeが入力画像よりも大きい場合は分割しないでそのまま返す
     if split[0] == 0 or split[1] == 0:
-        return arrayChk([img], array), (1, 1)
+        return arrayChk([square(img)], array), (1, 1)
 
     # 縦横の分割数を計算する
     if (h / size + w / size) > (h // size + w // size):

@@ -97,6 +97,11 @@ class TestImgFunc(unittest.TestCase):
         self.assertEqual(imgs.shape, (2, 256, 256, 3))
         self.assertEqual(split, (1, 1))
 
+        bk = IMG.blank((100, 120, 3), 255)
+        imgs, split = IMG.splitSQN([bk], 1024)
+        self.assertEqual(imgs.shape, (1, 100, 100, 3))
+        self.assertEqual(split, (1, 1))
+
         l = cv2.imread(lenna_path, IMG.getCh(1))
         m = cv2.imread(mandrill_path, IMG.getCh(1))
         imgs, split = IMG.splitSQN([l, m], 32)
