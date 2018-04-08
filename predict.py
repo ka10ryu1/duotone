@@ -49,22 +49,25 @@ def predict(model, data, size, rate, gpu):
     """
 
     shape = data.shape
-    data_sq, _ = IMG.splitSQ(data, size)
+    cv2.imshow('test', data)
+    cv2.waitKey(0)
+    data_sq, _ = IMG.splitSQ(data, size, array=False)
+    data = data_sq[0]
     # dataには圧縮画像と分割情報が含まれているので、分離する
-    imgs = []
     st = time.time()
     # 学習済みモデルに入力して画像を生成する
-    print(data.shape)
-    x = IMG.imgs2arr(data, gpu=gpu)
-    print(x.shape)
+    cv2.imshow('test', data)
+    cv2.waitKey(0)
+    x = IMG.img2arr(data, gpu=gpu)
+    x = x.reshape(1, x.shape[0], x.shape[1], x.shape[2])
     y = model.predictor(x)
-    imgs.extend(IMG.arr2imgs(to_cpu(y.array)))
+    img = IMG.arr2img(to_cpu(y.array))
 
     print('exec time: {0:.2f}[s]'.format(time.time() - st))
     # 生成された画像を分割情報をもとに結合する
-    buf = [np.vstack(imgs[i * size[0]: (i + 1) * size[0]])
-           for i in range(size[1])]
-    img = np.hstack(buf)
+    # buf = [np.vstack(imgs[i * size[0]: (i + 1) * size[0]])
+    #        for i in range(size[1])]
+    # img = np.hstack(buf)
     # 出力画像は入力画像の2倍の大きさになっているので半分に縮小する
     img = IMG.resize(img, 1 / rate)
     # 結合しただけでは画像サイズがオリジナルと異なるので切り取る
@@ -82,7 +85,7 @@ def main(args):
 
     model = L.Classifier(
         JC(n_unit=unit, n_out=1,
-           rate=sr, actfun1=af1, actfun2=af2)
+           rate=sr, actfun1=af1, actfun2=af2)  # , view=True)
     )
     # load_npzのpath情報を取得し、学習済みモデルを読み込む
     load_path = F.checkModelType(args.model)
