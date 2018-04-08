@@ -48,11 +48,11 @@ def predict(model, data, size, rate, gpu):
     [out] img:       推論実行で得られた生成画像
     """
 
-    shape = data.shape
     cv2.imshow('test', data)
     cv2.waitKey(0)
     data_sq, _ = IMG.splitSQ(data, size, array=False)
-    data = data_sq[0]
+    data = IMG.resizeP(data_sq[0], size)
+    shape = data.shape
     # dataには圧縮画像と分割情報が含まれているので、分離する
     st = time.time()
     # 学習済みモデルに入力して画像を生成する
@@ -62,7 +62,6 @@ def predict(model, data, size, rate, gpu):
     x = x.reshape(1, x.shape[0], x.shape[1], x.shape[2])
     y = model.predictor(x)
     img = IMG.arr2img(to_cpu(y.array))
-
     print('exec time: {0:.2f}[s]'.format(time.time() - st))
     # 生成された画像を分割情報をもとに結合する
     # buf = [np.vstack(imgs[i * size[0]: (i + 1) * size[0]])
