@@ -66,7 +66,8 @@ class UpSampleBlock(Chain):
         out_ch = int(in_ch / (self.rate ** 2))
         out_h = in_h * self.rate
         out_w = in_w * self.rate
-        out = F.reshape(h, (batchsize, self.rate, self.rate, out_ch, in_h, in_w))
+        out = F.reshape(
+            h, (batchsize, self.rate, self.rate, out_ch, in_h, in_w))
         out = F.transpose(out, (0, 3, 4, 1, 5, 2))
         out = F.reshape(out, (batchsize, out_ch, out_h, out_w))
         return out
@@ -87,6 +88,7 @@ class JC_DDUU(Chain):
         unit2 = n_unit * 2
         unit4 = n_unit * 4
         unit8 = n_unit * 8
+        unitF = n_unit * 16
         nout = (rate**2) * n_out
 
         super(JC_DDUU, self).__init__()
@@ -97,7 +99,8 @@ class JC_DDUU(Chain):
             self.d2 = DownSampleBlock(unit2, 5, 2, 2, actfun1, dropout)
             self.d3 = DownSampleBlock(unit4, 5, 2, 2, actfun1, dropout)
             self.d4 = DownSampleBlock(unit8, 5, 2, 2, actfun1, dropout)
-            self.d5 = DownSampleBlock(unit8, 3, 1, 1, actfun1, dropout)
+            self.d5 = DownSampleBlock(unitF, 5, 2, 2, actfun1, dropout)
+            self.d6 = DownSampleBlock(unitF, 3, 1, 1, actfun1, dropout)
 
             # U: n_unit1, n_unit2, ksize, stride, pad,
             #    actfun=None, dropout=0, wd=0.02, rate=2
@@ -105,7 +108,9 @@ class JC_DDUU(Chain):
             self.u2 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
             self.u3 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
             self.u4 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
-            self.u5 = UpSampleBlock(nout, n_out, 5, 1, 2, actfun2, 0, 0.02, rate)
+            self.u5 = UpSampleBlock(unit4, unit1, 5, 1, 2, actfun2, dropout)
+            self.u6 = UpSampleBlock(
+                nout, n_out, 5, 1, 2, actfun2, 0, 0.02, rate)
 
         self.view = view
         self.cnt = 0
@@ -119,7 +124,7 @@ class JC_DDUU(Chain):
     def block(self, f, x):
         if self.view:
             print('{0:2}: {1}\t{2:5.3f} s\t{3} '.format(
-                self.cnt, f.__class__.__name__, time.time()-self.timer, x.shape))
+                self.cnt, f.__class__.__name__, time.time() - self.timer, x.shape))
             self.cnt += 1
             self.timer = time.time()
 
@@ -133,12 +138,14 @@ class JC_DDUU(Chain):
         hc = self.block(self.d3, hb)
         hd = self.block(self.d4, hc)
         he = self.block(self.d5, hd)
+        hf = self.block(self.d6, he)
 
-        h = self.block(self.u1, F.concat([hd, he]))
-        h = self.block(self.u2, F.concat([hc, h]))
-        h = self.block(self.u3, F.concat([hb, h]))
-        h = self.block(self.u4, F.concat([ha, h]))
-        y = self.block(self.u5, h)
+        h = self.block(self.u1, F.concat([hf, he]))
+        h = self.block(self.u2, F.concat([hd, h]))
+        h = self.block(self.u3, F.concat([hc, h]))
+        h = self.block(self.u4, F.concat([hb, h]))
+        h = self.block(self.u5, F.concat([ha, h]))
+        y = self.block(self.u6, h)
 
         if self.view:
             print('Output:', y.shape)
