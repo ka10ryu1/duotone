@@ -53,18 +53,14 @@ def edgeDetect(duotone, color):
 
     # カーネルサイズの設定
     kernel5 = np.ones((5, 5), np.uint8)
-    kernel3 = np.ones((3, 3), np.uint8)
+    # 画像のノイズ除去
+    gray = cv2.fastNlMeansDenoising(cv2.cvtColor(color, cv2.COLOR_BGR2GRAY), h=20)
     # dilate -> diff で線が抽出できる
-    dilation = cv2.dilate(color, kernel5, iterations=1)
-    diff = cv2.subtract(dilation, color)
+    dilation = cv2.dilate(gray, kernel5, iterations=1)
+    diff = cv2.subtract(dilation, gray)
     diff_inv = 255 - diff
     # 線を単色 -> 2値にする
-    gray = cv2.cvtColor(diff_inv, cv2.COLOR_BGR2GRAY)
-    _, edge = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-    # 線のジャギを消すためにerode->dilateするが、
-    # 線を少し太く残したいので、dilateのカーネルサイズは少し小さく
-    edge = cv2.erode(edge, kernel5, iterations=1)
-    edge = cv2.dilate(edge, kernel3, iterations=1)
+    _, edge = cv2.threshold(diff_inv, 225, 255, cv2.THRESH_BINARY)
     # 線画とモノクロ2値を重ねる
     return cv2.bitwise_and(duotone, edge)
 
