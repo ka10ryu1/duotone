@@ -1,0 +1,25 @@
+{
+    "actfun1": "relu",
+    "actfun2": "sigmoid",
+    "batchsize": 12,
+    "dropout": 0.3,
+    "epoch": 250,
+    "frequency": 25,
+    "gpu_id": 0,
+    "in_path": "./result/",
+    "layer_num": 2,
+    "lossfun": "mse",
+    "network": 0,
+    "only_check": false,
+    "optimizer": "adam",
+    "out_path": "./result/",
+    "plot": true,
+    "resume": "result/buhasiv_200.snapshot",
+    "shape": [
+        3,
+        64,
+        64
+    ],
+    "shuffle_rate": 4,
+    "unit": 128
+}
