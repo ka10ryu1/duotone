@@ -439,23 +439,10 @@ def paste(fg, bg, rot=0, x=0, y=0, mask_flg=True, rand_rot_flg=True, rand_pos_fl
 
     # Load two images
     img1 = bg.copy()
-    white = (255, 255, 255)
     angle = [-90, 90]  # ランダム回転の範囲
     scale = 1.0  # 画像の拡大率
     white = (max_val, max_val, max_val)
     if rand_rot_flg:
-
-
-<< << << < HEAD
-        img2, rot = rotateR(fg, [-90, 90], 1.0)
-
-    white = (255, 255, 255)
-    angle = [-90, 90]  # ランダム回転の範囲
-    scale = 1.0  # 画像の拡大率
-    white = (max_val, max_val, max_val)
-    if rand_rot_flg:
-=======
->>>>>>> 18835ef48dd2b8a2b53637d130ceb595d67fb6d4
         # ランダムに回転
         img2, rot = rotateR(fg, angle, scale, white)
         print('rot', rot)
