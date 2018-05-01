@@ -9,39 +9,32 @@
 
 <img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test.JPG" width="640px">
 
-### 荒いドット
+### 学習結果
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="640px">
+
 
 **入力画像（上）と正解画像**
 
-<img src="https://github.com/ka10ryu1/duotone/blob/image/npz2jpg_1.jpg" width="640px">
+<img src="https://github.com/ka10ryu1/duotone/blob/image/npz2jpg_3.jpg" width="320px">
 
-**学習結果**
+上記の結果は、過学習を起こしたモデルから生成されている。画風変換系はそれっぽく変換できていればいいので、過学習でも問題ない。
 
-<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="320px">
+## デモの実行
 
-### 細かいドット
+以下を実行することで上記結果を再現できる。`demo.model`はファイルサイズが大きいのでgit-lfsで管理している。git-lfsを未インストールの場合はREADME最下部の**git-lfsのインストール**を参照すること。
 
-**入力画像（上）と正解画像**
-
-<img src="https://github.com/ka10ryu1/duotone/blob/image/npz2jpg_3.jpg" width="640px">
-
-**学習結果**
-
-<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-003.jpg" width="640px">
-
-### 過学習
-
-上記の結果は、以下に示すように過学習を起こしたモデルから生成されている。赤が荒いドットのloss、緑が細かいドットのloss。
-
-<img src="https://github.com/ka10ryu1/duotone/blob/image/plot_diff_loss.png" width="640px">
+```console
+$ ./predict.py Model/* [なんらかのカラー画像]
+```
 
 # 動作環境
 
-- **Ubuntu** 16.04.3 LTS ($ cat /etc/issue)
+- **Ubuntu** 16.04.4 LTS ($ cat /etc/issue)
 - **Python** 3.5.2 ($ python3 -V)
-- **chainer** 3.2 ($ pip3 show chainer | grep Ver)
-- **numpy** 1.13.3 ($ pip3 show numpy | grep Ver)
-- **cupy** 2.2 ($ pip3 show cupy | grep Ver)
+- **chainer** 4.0.0 ($ pip3 show chainer | grep Ver)
+- **numpy** 1.14.2 ($ pip3 show numpy | grep Ver)
+- **cupy** 4.0.0 ($ pip3 show cupy | grep Ver)
 - **opencv-python** 3.4.0.12 ($ pip3 show opencv-python | grep Ver)
 
 # ファイル構成
@@ -62,6 +55,9 @@ $ tree >& log.txt
 │   ├── network.py  > jpegcompのネットワーク部分
 │   ├── network2.py > duotoneのネットワーク部分
 │   └── plot_report_log.py
+├── Model
+│   ├── demo.model
+│   └── param.json
 ├── README.md
 ├── Tools
 │   ├── LICENSE
@@ -70,26 +66,24 @@ $ tree >& log.txt
 │   │   ├── Lenna.bmp       > テスト用画像
 │   │   ├── Mandrill.bmp    > テスト用画像
 │   │   ├── test_getfunc.py > getfuncのテスト用コード
-│   │   └── test_imgfunc.py > imgfuncのテスト用コード'
+│   │   └── test_imgfunc.py > imgfuncのテスト用コード
+│   ├── concat.py          > 複数の画像を任意の行列で結合する
 │   ├── dot2png.py         > dot言語で記述されたファイルをPNG形式に変換する
 │   ├── func.py            > 便利機能
-│   ├── getfunc.py         > 画像処理に関する便利機能
+│   ├── getfunc.py         > 各種パラメータ取得に関する便利機能
 │   ├── imgfunc.py         > 画像処理に関する便利機能
 │   ├── npz2jpg.py         > 作成したデータセット（.npz）の中身を画像として出力する
 │   ├── plot_diff.py       > logファイルの複数比較
 │   └── png_monitoring.py  > 任意のフォルダの監視
 ├── auto_train.sh
 ├── clean_all.sh
-├── concat.py         > 複数の画像を任意の行列で結合する
 ├── create_dataset.py > 画像を読み込んでデータセットを作成する
 ├── predict.py        > モデルとモデルパラメータを利用して推論実行する
 ├── predict_auto.py   > 任意のフォルダに保存された画像を推論実行し、別のフォルダに自動で保存する
 └── train.py          > 学習メイン部
-
-3 directories, 25 files
 ```
 
-データセットはテストデータ含め[別リポジトリ](https://github.com/ka10ryu1/FontDataAll)にて管理している。
+データセットはテストデータ含め[別リポジトリ](https://github.com/ka10ryu1/ImageDataAll)にて管理している。
 
 # チュートリアル
 
@@ -117,11 +111,13 @@ $ ./create_dataset.py ../ImageDataAll/concat_color.jpg ./ImageDataAll/concat_duo
 
 ## 学習する
 
+以下で学習が開始される。
+
 ```console
 $ ./train.py
 ```
 
-基本的にGPU使用を推奨（`-g GPU_ID`）。その他オプション引数は`-h`で確認する。学習が終了すると`OUT_PATH`フォルダに以下が保存される。
+基本的にGPU使用を推奨（`-g GPU_ID`）。その他オプション引数は`-h`で確認する。学習が終了すると`OUT_PATH`フォルダに以下が保存される。Topと同様のパラメータにしたい場合は`Model/param.json`を参考にすると良い。
 
 - `*.json`      < 推論実行で使用するパラメータファイル
 - `*.log`       < lossなどの学習時のデータ
@@ -132,6 +128,8 @@ $ ./train.py
 - `lr.png`      < lrのグラフ
 
 ## 推論実行する
+
+こちらもGPU必須だが、iDeep環境であれば1minかからず実行できる。
 
 ```console
 $ ./predict.py result/*.model result/*.json ../ImageDataAll/test.JPG -g 0
@@ -145,4 +143,37 @@ $ ./predict.py result/*.model result/*.json ../ImageDataAll/test.JPG -g 0
 
 ```console
 ./predict_auto.py result/*.model result/*.json ~/Dropbox/temp/duotone/monitor ~/Dropbox/temp/duotone/copy --force -g 0 -r 0.2
+```
+
+# git-lfsのインストール
+
+まず、apt-getできるように設定する
+
+```console
+$ curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+```
+
+※prixyありの場合は以下
+```console
+$ curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo -E bash
+```
+
+準備ができたらapt-get実行
+
+```console
+$ sudo apt-get install git-lfs
+```
+
+git-lfsを初期化
+
+```console
+$ git lfs install
+Updated git hooks.
+Git LFS initialized.
+```
+
+ファイルをpullする
+
+```console
+$ git lfs pull
 ```
