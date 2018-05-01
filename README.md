@@ -7,11 +7,15 @@
 
 ### 入力画像
 
-<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test.JPG" width="640px">
+<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test-castle.JPG" width="640px">
+
+<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test-braggart.JPG" width="640px">
 
 ### 学習結果
 
 <img src="https://github.com/ka10ryu1/duotone/blob/image/comp-001.jpg" width="640px">
+
+<img src="https://github.com/ka10ryu1/duotone/blob/image/comp-002.jpg" width="640px">
 
 
 **入力画像（上）と正解画像**
@@ -132,7 +136,7 @@ $ ./train.py
 こちらもGPU必須だが、iDeep環境であれば1minかからず実行できる。
 
 ```console
-$ ./predict.py result/*.model result/*.json ../ImageDataAll/test.JPG -g 0
+$ ./predict.py result/*.model result/*.json ../ImageDataAll/test-castle.JPG -g 0
 ```
 
 推論実行された結果が表示され、`OUT_PATH`フォルダ直下にもそれが保存される。
