@@ -9,7 +9,7 @@
 
 <img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test-castle.JPG" width="640px">
 
-<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test-braggart.JPG" width="640px">
+<img src="https://github.com/ka10ryu1/ImageDataAll/blob/master/test-braggart.jpg" width="640px">
 
 ### 学習結果
 
